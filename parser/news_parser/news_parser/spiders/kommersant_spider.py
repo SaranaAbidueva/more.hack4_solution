@@ -15,30 +15,31 @@ class KommersantSpider(scrapy.Spider):
 
     def start_requests(self):
         start_date = '2020-10-08'
-        end_date = '2022-10-08'
-        dates = pd.date_range(start_date, end_date).to_list
+        end_date = '2021-10-01'
+        dates = pd.date_range(start_date, end_date).strftime('%Y-%m-%d').to_list()
         print(dates)
-        url = f'https://api.forbes.ru/api/pub/lists/biznes?list%5Blimit%5D={limit}&list%5Boffset%5D={offset}'
-        yield scrapy.Request(url=url, callback=self.parse)
+        for date in dates:
+            url = f"https://www.kommersant.ru/archive/rubric/3/day/{date}"
+            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        base_url = 'https://www.forbes.ru/'
+        base_url = 'https://www.kommersant.ru'
 
-        data = json.loads(response.text)
-
-        for link in data['articles']:
-            yield scrapy.Request(url=base_url + link['data']['url_alias'], callback=self.parse_article)
+        for link in response.css('a.uho__link::attr(href)'):
+            yield scrapy.Request(url=base_url + link.get(), callback=self.parse_article)
 
     def parse_article(self, response):
-        title = response.css('h1::text').get()
+        title = response.css('h1.doc_header__name::text').get().strip()
         # print(title)
 
-        content_blocks = response.css('p.yl27R span::text').getall()
+        content_blocks = response.css('p.doc__text::text').getall()[:-1]
         content_blocks = [remove_tags(block).strip() for block in content_blocks]
         content = ' '.join(content_blocks)
+        # print(content)
 
-        date = response.css('time::text').get().replace('г.', '').strip()
+        date = response.css('time.doc_header__publish_time::text').get().split(',')[0].strip()
         date = get_date_from_text(date)
+        # print(date)
 
-        article = Article(title=title, content=content, date=date)
+        article = Article(title=title, content=content, date=date, url=response.request.url)
         yield article

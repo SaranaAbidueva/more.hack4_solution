@@ -3,11 +3,12 @@ from w3lib.html import remove_tags
 from ..items import Article
 import re
 
+
 class GazetaSpider(scrapy.Spider):
     name = "gazeta"
 
     custom_settings = {
-        'CLOSESPIDER_ITEMCOUNT': 10000
+        'CLOSESPIDER_ITEMCOUNT': 50000
     }
 
     def start_requests(self):
@@ -27,12 +28,12 @@ class GazetaSpider(scrapy.Spider):
         title = response.css('h1.headline::text').get()
 
         content_blocks = response.css('div.b_article-text p').getall()
-        content_blocks = [remove_tags(block) for block in content_blocks]
+        content_blocks = [remove_tags(block).replace('\xa0', ' ') for block in content_blocks]
         content = ' '.join(content_blocks)
 
         url = response.request.url
         pattern = r'(/\d*/\d+/\d+/)'
         date = re.search(pattern, url).group(1)
-        date = f'{date[9:11]}.{date[6:8]}.{date[1:5]}'
-        article = Article(title=title, content=content, date=date)
+        date = f'{date[1:5]}-{date[6:8]}-{date[9:11]}'
+        article = Article(title=title, content=content, date=date, url=url)
         yield article

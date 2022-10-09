@@ -32,5 +32,5 @@ class RBKSpider(scrapy.Spider):
 
         url = response.request.url
         date = get_date_from_url(url, 'rus')
-        article = Article(title=title, content=content, date=date)
+        article = Article(title=title, content=content, date=date, url=url)
         yield article

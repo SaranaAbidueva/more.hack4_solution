@@ -11,3 +11,4 @@ class Article(Item):
     tag = Field()
     content = Field()
     date = Field()
+    url = Field()

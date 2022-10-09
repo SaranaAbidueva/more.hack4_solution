@@ -38,6 +38,12 @@ def get_date_from_text(text):
 
     day = text[:2]
     year = text[-4:]
-    month_name = re.search(r'\s(\w+)\s', text).group(1)
-    month = MONTH_DICT[month_name]
+    if text[2] == '.':
+        month = text[3:5]
+    else:
+        month_name = re.search(r'\s(\w+)\s', text).group(1)
+        month = MONTH_DICT[month_name]
+
+    if month is None:
+        return None
     return f'{year}-{month}-{day}'

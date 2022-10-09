@@ -37,5 +37,5 @@ class ForbesSpider(scrapy.Spider):
         date = response.css('time::text').get().replace('г.', '').strip()
         date = get_date_from_text(date)
 
-        article = Article(title=title, content=content, date=date)
+        article = Article(title=title, content=content, date=date, url=response.request.url)
         yield article
