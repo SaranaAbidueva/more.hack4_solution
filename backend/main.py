@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 import pandas as pd
-from ml.logic import get_clusters
 
 app = FastAPI()
 
@@ -8,8 +7,7 @@ app = FastAPI()
 @app.get("/get_trends")
 async def get_trends():
     trends_df = pd.read_csv('data/trends.csv')
-
-    return {'trends': trends_df.to_list()}
+    return {'trends': trends_df.iloc[:, 1].tolist()}
 
 
 @app.get("/get_digest")
